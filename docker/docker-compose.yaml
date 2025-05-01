@@ -1,0 +1,33 @@
+version: "3.9"
+
+services:
+  main:
+    runtime: nvidia
+    build:
+      context: .
+      # dockerfile: cuda12-6.dockerfile
+      dockerfile: cuda12-2.dockerfile
+    image: ${USER}/msdp:latest
+    container_name: ${USER}_msdp
+    network_mode: host
+    privileged: true
+    shm_size: '50gb'
+    # user: "1000:1000"
+    volumes:
+      - ${PWD}/../:/root/workspace
+      - ${HOME}/.maniskill/demos:/data
+      - /tmp/.x11-unix:/tmp/.x11-unix
+    environment:
+      - QT_X11_NO_MITSHM=1
+      - WANDB_API_KEY=${WANDB_API_KEY}
+      # Hack with HDF5 file locking
+      - HDF5_USE_FILE_LOCKING=FALSE
+      # For debugging with Hydra
+      - HYDRA_FULL_ERROR=1
+      - HF_DATASETS_CACHE=./caches
+      - TRANSFORMERS_CACHE=./caches
+      - HF_HOME=./caches
+      - SENTENCE_TRANSFORMERS_HOME=./caches
+      - DATASET_DIR=/data
+    command: ./workspace/docker/initialize-docker-container.sh
+  
