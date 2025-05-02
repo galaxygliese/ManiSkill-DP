@@ -193,7 +193,7 @@ class ModifiedSmallDemoDataset_DiffusionPolicy(Dataset):  # Load everything into
         frames = read_video_frames(video_path)
         
         obs_traj = {
-            "state": frames
+            "rgb": frames
         }
         obs_seq = {}
         for k, v in obs_traj.items():

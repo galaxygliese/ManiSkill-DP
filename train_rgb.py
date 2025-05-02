@@ -66,7 +66,7 @@ class Args:
     """number of trajectories to load from the demo dataset"""
     total_iters: int = 1_000_000
     """total timesteps of the experiment"""
-    batch_size: int = 256
+    batch_size: int = 32#256
     """the batch size of sample from the replay memory"""
 
     # Diffusion Policy specific arguments
@@ -154,7 +154,8 @@ class Agent(nn.Module):
         )
         self.noise_pred_net = ConditionalUnet1D(
             input_dim=self.act_dim,  # act_horizon is not used (U-Net doesn't care)
-            global_cond_dim=self.obs_horizon * (visual_feature_dim + obs_state_dim),
+            # global_cond_dim=self.obs_horizon * (visual_feature_dim + obs_state_dim),
+            global_cond_dim=self.obs_horizon * (visual_feature_dim),
             diffusion_step_embed_dim=args.diffusion_step_embed_dim,
             down_dims=args.unet_dims,
             n_groups=args.n_groups,
@@ -184,13 +185,15 @@ class Agent(nn.Module):
         visual_feature = visual_feature.reshape(
             batch_size, self.obs_horizon, visual_feature.shape[1]
         )  # (B, obs_horizon, D)
-        feature = torch.cat(
-            (visual_feature, obs_seq["state"]), dim=-1
-        )  # (B, obs_horizon, D+obs_state_dim)
+        # feature = torch.cat(
+        #     (visual_feature, obs_seq["state"]), dim=-1
+        # )  # (B, obs_horizon, D+obs_state_dim) # Concatting with pos
+        feature = visual_feature
         return feature.flatten(start_dim=1)  # (B, obs_horizon * (D+obs_state_dim))
 
     def compute_loss(self, obs_seq, action_seq):
-        B = obs_seq["state"].shape[0]
+        # B = obs_seq["state"].shape[0]
+        B = obs_seq["rgb"].shape[0]
 
         # observation as FiLM conditioning
         obs_cond = self.encode_obs(
@@ -224,7 +227,8 @@ class Agent(nn.Module):
         # if we use DDPM, and inference_diffusion_steps == train_diffusion_steps, then we can skip this
 
         # obs_seq['state']: (B, obs_horizon, obs_state_dim)
-        B = obs_seq["state"].shape[0]
+        # B = obs_seq["state"].shape[0]
+        B = obs_seq["rgb"].shape[0]
         with torch.no_grad():
             if self.include_rgb:
                 obs_seq["rgb"] = obs_seq["rgb"].permute(0, 1, 4, 2, 3)
