@@ -102,7 +102,7 @@ def load_demo_dataset(
     raw_data = load_traj_hdf5(path, num_traj)
     # raw_data has keys like: ['traj_0', 'traj_1', ...]
     # raw_data['traj_0'] has keys like: ['actions', 'dones', 'env_states', 'infos', ...]
-    _traj = raw_data["traj_0"]
+    _traj = raw_data["traj_0"] # dict_keys(['obs', 'actions', 'terminated', 'truncated', 'success', 'env_states', 'rewards'])
     for key in keys:
         source_key = TARGET_KEY_TO_SOURCE_KEY[key]
         assert source_key in _traj, f"key: {source_key} not in traj_0: {_traj.keys()}"

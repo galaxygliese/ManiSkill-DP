@@ -104,7 +104,8 @@ class Args:
     """the simulation backend to use for evaluation environments. can be "cpu" or "gpu"""
     num_dataload_workers: int = 0
     """the number of workers to use for loading the training data in the torch dataloader"""
-    control_mode: str = "pd_joint_delta_pos"
+    # control_mode: str = "pd_joint_delta_pos"
+    control_mode:str = "pd_joint_pos"
     """the control mode to use for the evaluation environments. Must match the control mode of the demonstration dataset."""
 
     # additional tags/configs for logging purposes to wandb and shared comparisons with other algorithms
@@ -395,6 +396,7 @@ def save_ckpt(run_name, tag):
 
 if __name__ == "__main__":
     args = tyro.cli(Args)
+    print("Args Control Mode:", args.control_mode)
 
     if args.exp_name is None:
         args.exp_name = os.path.basename(__file__)[: -len(".py")]
@@ -414,6 +416,7 @@ if __name__ == "__main__":
                 control_mode = demo_info["episodes"][0]["control_mode"]
             else:
                 raise Exception("Control mode not found in json")
+            print(">>>>", control_mode, args.control_mode)
             assert (
                 control_mode == args.control_mode
             ), f"Control mode mismatched. Dataset has control mode {control_mode}, but args has control mode {args.control_mode}"
